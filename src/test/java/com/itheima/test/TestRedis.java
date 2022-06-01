@@ -73,6 +73,7 @@ public class TestRedis {
 
         // 获得列表长度len
         Long size = listOperations.size("myList");
+        assert size != null;
         int lSize = size.intValue();
 
         for (int i = lSize; i > 0; i--) {
