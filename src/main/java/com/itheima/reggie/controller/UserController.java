@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
-import com.itheima.reggie.utils.SMSUtils;
 import com.itheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +28,7 @@ public class UserController {
     private UserService userService;
 
     @Resource
-    private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 发送手机短信验证码
@@ -54,7 +52,7 @@ public class UserController {
             // session.setAttribute(phone,code);
 
             // 将我们生成的验证码缓存到redis时间为5分钟
-            redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
 
             return R.success("手机验证码短信发送成功");
         }
@@ -82,7 +80,7 @@ public class UserController {
         // Object codeInSession = session.getAttribute(phone);
 
         // 从redis中获取缓存的验证码
-        String codeInRedis = redisTemplate.opsForValue().get(phone);
+        String codeInRedis = stringRedisTemplate.opsForValue().get(phone);
 
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
         if(codeInRedis != null && codeInRedis.equals(code)){
@@ -102,7 +100,7 @@ public class UserController {
             session.setAttribute("user",user.getId());
 
             // 如果用户登录成功就可以删除缓存中的验证码
-            redisTemplate.delete(phone);
+            stringRedisTemplate.delete(phone);
 
             return R.success(user);
         }
